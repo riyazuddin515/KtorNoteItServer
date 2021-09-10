@@ -6,6 +6,8 @@ interface INotesRepository {
 
     suspend fun addNote(note: Note): Boolean
 
+    suspend fun updateNote(note: Note): Boolean
+
     suspend fun getNoteOwner(noteId: String): String
 
     suspend fun getNotes(userId: String): List<Note>

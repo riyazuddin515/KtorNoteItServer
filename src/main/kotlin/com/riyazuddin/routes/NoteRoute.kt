@@ -46,13 +46,22 @@ fun Route.addNote(
                 return@post
             }
 
-            val result = notesService.addNote(request)
+            val type: String
+            val result: Boolean
+            val noteExists = notesService.noteExistsWithId(request.id)
+            type = if (noteExists) {
+                result = notesService.updateNote(request)
+                "UPDATED"
+            } else {
+                result = notesService.addNote(request)
+                "ADDED"
+            }
             if (result) {
                 call.respond(
                     HttpStatusCode.OK,
                     SimpleResponse(
                         true,
-                        "Note added"
+                        if (type == "ADDED") "Note Added." else "Note Updated."
                     )
                 )
                 return@post
@@ -61,7 +70,7 @@ fun Route.addNote(
                     HttpStatusCode.Conflict,
                     SimpleResponse(
                         false,
-                        "Failed to Added. Try Later"
+                        "Failed to Added/Update. Try Later"
                     )
                 )
                 return@post
@@ -73,10 +82,21 @@ fun Route.addNote(
 fun Route.getNotes(
     userService: UserService,
     notesService: NotesService
-){
+) {
     authenticate {
         get("/api/note/getNotes") {
             val userId = call.userId
+            val userExists = userService.userExistWithId(userId)
+            if (!userExists) {
+                call.respond(
+                    HttpStatusCode.NotFound,
+                    SimpleResponse(
+                        false,
+                        "Requesting user not found."
+                    )
+                )
+                return@get
+            }
             val list = notesService.getNotes(userId)
             call.respond(
                 HttpStatusCode.OK,
@@ -89,7 +109,7 @@ fun Route.getNotes(
 fun Route.deleteNote(
     userService: UserService,
     notesService: NotesService
-){
+) {
     authenticate {
         post("/api/note/deleteNote") {
             val request = call.receiveOrNull<DeleteNoteRequest>() ?: kotlin.run {
@@ -145,7 +165,7 @@ fun Route.deleteNote(
                     )
                 )
                 return@post
-            }else{
+            } else {
                 call.respond(
                     HttpStatusCode.Conflict,
                     SimpleResponse(

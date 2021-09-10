@@ -5,7 +5,7 @@ import org.litote.kmongo.coroutine.CoroutineDatabase
 import org.litote.kmongo.eq
 
 class NotesRepositoryImpl(
-    private val db: CoroutineDatabase
+    db: CoroutineDatabase
 ) : INotesRepository {
 
     private val notesCollection = db.getCollection<Note>()
@@ -16,6 +16,10 @@ class NotesRepositoryImpl(
 
     override suspend fun addNote(note: Note): Boolean {
         return notesCollection.insertOne(note).wasAcknowledged()
+    }
+
+    override suspend fun updateNote(note: Note): Boolean {
+        return notesCollection.updateOneById(note.id, note).wasAcknowledged()
     }
 
     override suspend fun getNotes(userId: String): List<Note> {
