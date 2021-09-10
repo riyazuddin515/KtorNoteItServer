@@ -6,6 +6,7 @@ import com.riyazuddin.data.model.User
 import com.riyazuddin.data.requests.AccountRequest
 import com.riyazuddin.data.response.AuthResponse
 import com.riyazuddin.data.response.SimpleResponse
+import com.riyazuddin.secure.passwordToHash
 import com.riyazuddin.services.UserService
 import io.ktor.application.*
 import io.ktor.http.*
@@ -66,7 +67,7 @@ fun Route.signUp(userService: UserService) {
                 val result = userService.signUp(
                     User(
                         request.email,
-                        request.password
+                        passwordToHash(request.password)
                     )
                 )
                 if (result) {
@@ -113,6 +114,7 @@ fun Route.login(
             )
             return@post
         }
+
         val result = userService.login(request.email, request.password)
         if (result) {
             val expiresIn = 1000L * 60L * 60L * 24L * 365L

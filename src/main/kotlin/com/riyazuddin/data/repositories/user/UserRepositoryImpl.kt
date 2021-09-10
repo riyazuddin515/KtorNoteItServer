@@ -1,6 +1,7 @@
 package com.riyazuddin.data.repositories.user
 
 import com.riyazuddin.data.model.User
+import com.riyazuddin.secure.checkHashForPassword
 import org.litote.kmongo.coroutine.CoroutineDatabase
 import org.litote.kmongo.eq
 
@@ -28,6 +29,6 @@ class UserRepositoryImpl(
 
     override suspend fun login(email: String, password: String): Boolean {
         val actualPassword = getUserWithEmail(email)?.password ?: return false
-        return actualPassword == password
+        return checkHashForPassword(password, actualPassword)
     }
 }
